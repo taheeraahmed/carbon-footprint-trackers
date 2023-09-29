@@ -11,19 +11,15 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.tracker == "experiment-tracker":
-        # Initialize Experiment Impact Tracker
-        tracker = ImpactTracker(logdir="logs")
-        # Perform object detection and save image with bounding boxes
-        object_detection(args.image)
-        # Stop the tracker and display the impact
+        tracker = ImpactTracker("logs")
         tracker.launch_impact_monitor()
+        info = tracker.get_latest_info_and_check_for_errors()
+        print("Tracker Info:", info)
+        object_detection(args.image)
     elif args.tracker == "code-carbon":
-        # Initialize CodeCarbon's EmissionsTracker
         tracker = EmissionsTracker()
         tracker.start()
-        # Perform object detection and save image with bounding boxes
         object_detection(args.image)
-        # Stop the tracker and display the emissions
         tracker.stop()
     else:
         raise ValueError("Invalid tracker name")
