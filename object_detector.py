@@ -1,9 +1,8 @@
-import argparse
+
 import torch
 import torchvision.transforms as transforms
 from torchvision import models
 from PIL import Image, ImageDraw, ImageFont
-from codecarbon import EmissionsTracker
 
 def object_detection(image_path, save_path="output.jpg"):
     # Initialize the model
@@ -30,7 +29,8 @@ def object_detection(image_path, save_path="output.jpg"):
     scores = output[0]["scores"].cpu().numpy()
     draw = ImageDraw.Draw(input_image)
 
-    COCO_INSTANCE_CATEGORY_NAMES = [
+    # Assume category names are the same as the original
+    COCO_INSTANCE_CATEGORY_NAMES = COCO_INSTANCE_CATEGORY_NAMES = [
         "__background__", "person", "bicycle", "car", "motorcycle", "airplane", "bus",
         "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign",
         "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow",
@@ -56,27 +56,8 @@ def object_detection(image_path, save_path="output.jpg"):
             text_y_position = max(0, y1 - 12)
             txt = f"{COCO_INSTANCE_CATEGORY_NAMES[label]}: {score:.2f}"
 
+            # portion of image width you want text width to be
             draw.text((x1+4, text_y_position+4), txt, fill="red", font=font)
-
+            
     input_image.save(save_path)
     print(f"Saved object detected image at {save_path}")
-
-
-if __name__ == "__main__":
-    # Argument parsing
-    parser = argparse.ArgumentParser(description="Object Detection")
-    parser.add_argument("--image", type=str, help="Path to the image for object detection")
-    args = parser.parse_args()
-
-    # Initialize CodeCarbon's EmissionsTracker
-    tracker = EmissionsTracker("logs/code-carbon")
-    tracker.start()
-
-    # Perform object detection and save image with bounding boxes
-    object_detection(args.image)
-
-    # Stop the tracker and display the emissions
-    tracker.stop()
-
-    # For this specific version of CodeCarbon, the emissions data might be saved in a file.
-    # Check the directory for a CSV or JSON file that contains the emissions data.
