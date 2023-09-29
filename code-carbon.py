@@ -45,16 +45,29 @@ def object_detection(image_path, save_path="output.jpg"):
     ]
 
     draw = ImageDraw.Draw(input_image)
-    font = ImageFont.load_default()
+    fontsize = 1  # starting font size
+    # TODO where is font stored?
+    font = ImageFont.truetype(font ="",size = fontsize)
 
     for box, label, score in zip(boxes, labels, scores):
         if score > 0.5:  # You can set your own threshold
             x1, y1, x2, y2 = box
             draw.rectangle([x1, y1, x2, y2], outline="red", width=3)
-            class_name = COCO_INSTANCE_CATEGORY_NAMES[label]
 
             # Ensure the text position is within the image boundary
             text_y_position = max(0, y1 - 12)
+            txt = f"{COCO_INSTANCE_CATEGORY_NAMES[label]}: {score:.2f}"
+
+            # portion of image width you want text width to be
+            img_fraction = 0.50
+
+            font = ImageFont.truetype("arial.ttf", fontsize)
+            while font.getsize(txt)[0] < img_fraction*input_image.size[0]:
+                # iterate until the text size is just larger than the criteria
+                fontsize += 1
+                font = ImageFont.truetype("arial.ttf", fontsize)
+            
+            draw.text((x1+4, text_y_position+4), txt, fill="red", font=font, size=fontsize)
 
     input_image.save(save_path)
     print(f"Saved object detected image at {save_path}")
